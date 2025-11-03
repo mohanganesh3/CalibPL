@@ -1,0 +1,148 @@
+# ── Python ───────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ──────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── IDE ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Jupyter ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Model weights (large binaries — download separately) ──────────
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+
+# ── Raw image datasets (too large — download via scripts) ─────────
+# Keep YAML configs but exclude raw image/label directories
+data/SKU110K/yolo_format/train/
+data/SKU110K/yolo_format/val/
+data/SKU110K/yolo_format/unlabeled/
+data/SKU110K/yolo_format/test/
+data/coco/images/
+data/coco/annotations/
+data/coco/yolo_format/train/
+data/coco/yolo_format/val/
+data/crowdhuman/
+
+# ── Large training logs ───────────────────────────────────────────
+results/grand_experiment*.log
+results/grand_experiment_seed*.log
+results/phase_b_gpu*.log
+results/phase_b_gpu*_resume.log
+results/phase_c_gpu*.log
+results/phase14_*.log
+results/ssod_baselines.log
+results/consistent_teacher_sku110k.log
+results/rtdetr_gpu_training.log
+results/yolov12_gpu_training.log
+results/alpha_sweep.log
+results/smoking_gun_confidence.log
+results/smoking_gun_isotonic.log
+results/calibpl_sku10_seed43.log
+results/calibpl_sku10_seed44.log
+results/fixed_thresh_sku10_seed43.log
+results/fixed_thresh_sku10_seed44.log
+results/calibcotrain_cl.log
+results/calibpl_yolo_table3.log
+
+# ── YOLO training runs ────────────────────────────────────────────
+runs/
+scripts/runs/
+results/week1_baselines/
+results/calibpl_v3/
+results/phase14_selftrain/
+results/phase14_baselines/
+results/phase_c_calibpl/
+results/calibcotrain_cl/
+results/coco1pct/
+results/cwpl/
+results/ssod_baselines/
+results/smoking_gun_ablation/
+results/bmvc_logs/
+results/ece_drift/
+results/diagnostic/
+results/pipeline_test/
+results/label_fractions/
+results/kappa_analysis/
+results/tail_misalignment/
+results/week2_calibration/
+results/baselines/
+
+# ── Old submission archives ───────────────────────────────────────
+bmvc_submission_*.zip
+bmvc_submission_*.zip
+paper/bmvc_submission.zip
+paper/wacv2027/wacv2027_calibpl_submission.zip
+paper/wacv2027/build/
+
+# ── Internal process / status docs (not for public) ──────────────
+ACCEPTANCE_ROADMAP.md
+COMPREHENSIVE_EVALUATION_PACKAGE.md
+CURRENT_STATUS_HONEST.md
+EVALUATION_SUMMARY_TOMORROW.md
+EXPERIMENT_RESULTS_COMPLETE.md
+FACULTY_EVALUATION_READY.md
+FINAL_PAPER_REPORT.md
+FINAL_STATUS_REPORT.md
+MONITORING_GUIDE.md
+READY_FOR_TOMORROW.md
+REPRODUCTION_QUICK_START_FINAL.md
+STATUS_AND_TIMELINE.md
+STATUS_UPDATE_*.md
+brutal_honest_assessment.md
+upgraded_master_plan.md
+final_plan.md
+
+# ── Debug / temp files ───────────────────────────────────────────
+nohup.out
+*.out
+strace_out*.txt
+test_ddp*.py
+build_git_history.sh
+
+# ── Old experiments and vendor dirs ──────────────────────────────
+old/
+external/
+.agents/
+_extracted_text/
+retail-ai-pipeline/
+neuro_symbolic/
+papers/
+
+# ── LaTeX build artifacts ─────────────────────────────────────────
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+paper/wacv2027/build/
+paper/compile*.log
+paper/missfont.log
+paper/output.txt
+
+# ── OS ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Secrets ───────────────────────────────────────────────────────
+.env
+*.pem

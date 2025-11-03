@@ -1,0 +1,35 @@
+# CalibPL — Core Dependencies
+# WACV 2027 Research Codebase
+
+# Deep Learning Framework
+torch>=2.1.0
+torchvision>=0.16.0
+
+# YOLOv12 / Ultralytics
+ultralytics>=8.2.0
+
+# Calibration
+scikit-learn>=1.3.0     # IsotonicRegression, GaussianMixture
+
+# Numerical Computing
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Computer Vision
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# Data / I/O
+pyyaml>=6.0
+tqdm>=4.65.0
+pandas>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Statistical Testing
+statsmodels>=0.14.0
+
+# Experiment Logging
+json5>=0.9.14
