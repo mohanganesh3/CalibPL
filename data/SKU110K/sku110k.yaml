@@ -1,0 +1,14 @@
+# SKU-110K Dataset - YOLO format configuration
+# For calibration paper: 1400 train / 200 val / 400 test + 8000 unlabeled
+
+path: /home/mohanganesh/retail-shelf-detection/data/SKU110K/yolo_format
+train: train/images
+val: val/images
+test: test/images
+
+# Number of classes
+nc: 1
+
+# Class names
+names:
+  0: product

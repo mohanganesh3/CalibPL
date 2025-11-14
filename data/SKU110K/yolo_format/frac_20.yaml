@@ -1,0 +1,11 @@
+# SKU-110K 20% Label Fraction
+# 280 labeled / 9120 unlabeled
+
+path: /home/mohanganesh/retail-shelf-detection/data/SKU110K/yolo_format/frac_20
+train: train/images
+val: /home/mohanganesh/retail-shelf-detection/data/SKU110K/yolo_format/val
+test: /home/mohanganesh/retail-shelf-detection/data/SKU110K/yolo_format/test
+
+nc: 1
+names:
+  0: product
