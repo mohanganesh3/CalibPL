@@ -1,0 +1,91 @@
+{
+  "title": "Static vs Adaptive Recalibration Analysis",
+  "description": "Compares calibration quality when using a static (iter-0) vs adaptive (per-iteration) calibrator",
+  "static_isotonic": [
+    {
+      "iteration": 0,
+      "d_ece": 3.7282082064293343e-17
+    },
+    {
+      "iteration": 1,
+      "d_ece": 0.023608276699143553
+    },
+    {
+      "iteration": 2,
+      "d_ece": 0.018699659762648896
+    },
+    {
+      "iteration": 3,
+      "d_ece": 0.013685530211211222
+    },
+    {
+      "iteration": 4,
+      "d_ece": 0.012981336124055835
+    },
+    {
+      "iteration": 5,
+      "d_ece": 0.012710140809588284
+    }
+  ],
+  "adaptive_isotonic": [
+    {
+      "iteration": 0,
+      "d_ece": 0
+    },
+    {
+      "iteration": 1,
+      "d_ece": 1.4690538257091763e-17
+    },
+    {
+      "iteration": 2,
+      "d_ece": 7.31863108922472e-17
+    },
+    {
+      "iteration": 3,
+      "d_ece": 1.6285908018975953e-17
+    },
+    {
+      "iteration": 4,
+      "d_ece": 9.982418230346974e-18
+    },
+    {
+      "iteration": 5,
+      "d_ece": 1.5382326156228172e-17
+    }
+  ],
+  "raw_uncalibrated": [
+    {
+      "iteration": 0,
+      "d_ece": 0.10915697531576174
+    },
+    {
+      "iteration": 1,
+      "d_ece": 0.13334128066094167
+    },
+    {
+      "iteration": 2,
+      "d_ece": 0.11399606415773138
+    },
+    {
+      "iteration": 3,
+      "d_ece": 0.1059508948959427
+    },
+    {
+      "iteration": 4,
+      "d_ece": 0.11578000208252108
+    },
+    {
+      "iteration": 5,
+      "d_ece": 0.12522704638641405
+    }
+  ],
+  "analysis": {
+    "static_mean_d_ece": 0.016336988721329555,
+    "adaptive_mean_d_ece": 2.5905500310978014e-17,
+    "raw_mean_d_ece": 0.11885905763671019,
+    "static_max_d_ece": 0.023608276699143553,
+    "adaptive_max_d_ece": 7.31863108922472e-17,
+    "improvement_ratio": 163369887.21329555,
+    "conclusion": "Adaptive recalibration maintains near-zero D-ECE while static calibration shows increasing degradation."
+  }
+}

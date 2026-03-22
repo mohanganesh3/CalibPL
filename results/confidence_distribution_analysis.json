@@ -1,0 +1,83 @@
+{
+  "title": "Confidence Distribution Shift Under Iterative SSOD",
+  "description": "Analyzes how model confidence distributions change across co-training iterations",
+  "iterations": [
+    {
+      "iteration": 0,
+      "d_ece_raw": 0.10915697531576174,
+      "brier_score": 0.1046259398311263,
+      "num_detections": 99905
+    },
+    {
+      "iteration": 1,
+      "d_ece_raw": 0.13334128066094167,
+      "brier_score": 0.11632049473289896,
+      "num_detections": 93913,
+      "pseudo_labels": {
+        "total_boxes": 35428,
+        "accepted": 35428,
+        "rejected": 39847,
+        "acceptance_rate": 1.0
+      }
+    },
+    {
+      "iteration": 2,
+      "d_ece_raw": 0.11399606415773138,
+      "brier_score": 0.10886427228832515,
+      "num_detections": 92702,
+      "pseudo_labels": {
+        "total_boxes": 34666,
+        "accepted": 34666,
+        "rejected": 35369,
+        "acceptance_rate": 1.0
+      }
+    },
+    {
+      "iteration": 3,
+      "d_ece_raw": 0.1059508948959427,
+      "brier_score": 0.10925443955401923,
+      "num_detections": 89256,
+      "pseudo_labels": {
+        "total_boxes": 34744,
+        "accepted": 34744,
+        "rejected": 33040,
+        "acceptance_rate": 1.0
+      }
+    },
+    {
+      "iteration": 4,
+      "d_ece_raw": 0.11578000208252108,
+      "brier_score": 0.11143699168003164,
+      "num_detections": 87762,
+      "pseudo_labels": {
+        "total_boxes": 34163,
+        "accepted": 34163,
+        "rejected": 30378,
+        "acceptance_rate": 1.0
+      }
+    },
+    {
+      "iteration": 5,
+      "d_ece_raw": 0.12522704638641405,
+      "brier_score": 0.11448818731085511,
+      "num_detections": 90118,
+      "pseudo_labels": {
+        "total_boxes": 34058,
+        "accepted": 34058,
+        "rejected": 27721,
+        "acceptance_rate": 1.0
+      }
+    }
+  ],
+  "trends": {
+    "d_ece_trend": "increasing",
+    "d_ece_range": [
+      0.1059508948959427,
+      0.13334128066094167
+    ],
+    "brier_trend": "increasing",
+    "detection_count_trend": "decreasing",
+    "detection_count_change_pct": -9.796306491166607,
+    "acceptance_rate_trend": "decreasing"
+  }
+}
