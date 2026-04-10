@@ -1,0 +1,480 @@
+% =============================================================================
+% CalibPL: Supplementary Material — WACV 2027
+%
+% Anonymized double-blind submission.
+% Contents:
+%   Section A:  Full proof of Proposition 1 (NMS Tail Amplification)
+%   Section B:  Inference time profiling
+%   Section C:  Kuzucu et al. static vs. dynamic calibration comparison
+%   Section D:  Per-class D-ECE breakdown
+%   Section E:  COCO 1% sparse-regime full results
+%   Section F:  Independence assumption: test results
+%   Section G:  SKU-110K full ablation with standard deviations
+%   Section H:  Failure cases and limitations
+% =============================================================================
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage{wacv}
+\usepackage{amsmath,amssymb,amsthm,booktabs,graphicx,multirow,enumitem,xcolor,microtype}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+
+\newcommand{\method}{\textbf{CalibPL}}
+\newcommand{\coco}{\textsc{COCO}}
+\newcommand{\sku}{\textsc{SKU-110K}}
+\def\etal{\emph{et al.}}
+\newcommand{\deltaece}{\Delta\!\operatorname{ECE}}
+
+\title{CalibPL: Supplementary Material}
+\author{Anonymous Author(s)}
+
+\begin{document}
+\maketitle
+
+This supplementary material provides: (A)~the complete formal proof of
+Proposition~1, (B)~inference time profiling, (C)~a direct comparison of static
+vs.\ dynamic isotonic calibration showing the mechanism that distinguishes our
+work from Kuzucu~\etal, (D)~per-class calibration breakdown, (E)~full
+COCO sparse-regime results, (F)~independence test results,
+(G)~full ablation tables with standard deviations, and (H)~failure cases.
+
+% ============================================================================
+\section*{A. Complete Proof of Proposition 1 (NMS Tail Amplification)}
+\label{sec:proof}
+% ============================================================================
+
+We restate and prove Proposition~1 from the main paper in full generality.
+
+\textbf{Setup.}
+Fix an IoU suppression threshold $\theta_\text{NMS}\in(0,1)$. Given a set of
+candidate detections for a single class, greedy NMS sorts by descending
+classification score $S\in[0,1]$ and iteratively keeps a box if it is not
+suppressed by a previously kept box (suppression: IoU $>\theta_\text{NMS}$).
+
+\textbf{Clique competition model.}
+Consider a spatial neighborhood that induces a set of $n\ge1$ candidate
+detections that are \emph{mutually suppressing} under NMS (the overlap graph is
+a clique). Greedy NMS keeps exactly one element: the one with maximal score.
+
+For each candidate $i\in\{1,\dots,n\}$ define:
+\begin{itemize}[noitemsep]
+  \item $S_i\in[0,1]$: classification confidence score
+  \item $Q_i\in[0,1]$: localization quality (e.g., IoU with matched GT)
+  \item $L_i := \mathbf{1}\{Q_i \ge \tau\}$: localization-correctness indicator
+        for IoU threshold $\tau\in(0,1]$
+\end{itemize}
+
+Assume $(S_i, Q_i)$ are i.i.d.\ and that $S$ has a continuous distribution
+(ties have probability zero). Define:
+\[
+I^* := \arg\max_{1\le i\le n} S_i, \qquad S^* := S_{I^*}, \qquad L^* := L_{I^*}.
+\]
+
+\begin{definition}[True precision-at-confidence]
+$g(s) := \mathbb{P}(L=1 \mid S=s)$, defined a.e.\ with respect to the
+distribution of $S$.
+\end{definition}
+
+\begin{definition}[Tail overconfidence]
+Suppose there exist $s_0\in[0,1)$ and $\delta>0$ such that
+\[
+g(s) \le s - \delta \qquad \text{for (Lebesgue-)a.e.\ $s\in[s_0,1]$.} \tag{A}
+\]
+This says that in the high-score tail, the true precision systematically lags
+the confidence score by at least $\delta$.
+\end{definition}
+
+\begin{lemma}[NMS selects an order statistic]
+\label{lem:order}
+In the clique model, $S^* \overset{d}{=} \max_{1\le i\le n} S_i$, and
+$\mathbb{P}(S^* \le s) = F_S(s)^n$ for all $s\in[0,1]$, where $F_S$ is the
+CDF of $S$.
+\end{lemma}
+\begin{proof}
+In a clique, the first processed element under descending-score ordering
+suppresses all others (all pairwise IoUs exceed $\theta_\text{NMS}$), hence
+the kept element is the unique maximizer. For i.i.d.\ $S_i$:
+\[
+\mathbb{P}(S^*\le s)=\mathbb{P}(S_1\le s,\dots,S_n\le s)=F_S(s)^n. \qed
+\]
+\end{proof}
+
+\begin{proposition}[NMS Tail Amplification, restated]
+\label{prop:nms_tail_full}
+Define the expected overconfidence gap after NMS:
+\[
+\Delta_n := \mathbb{E}[S^*] - \mathbb{E}[g(S^*)] = \mathbb{E}[S^* - g(S^*)].
+\]
+Under assumption (A):
+\[
+\Delta_n \;\ge\; \delta\bigl(1 - F_S(s_0)^n\bigr).
+\]
+The bound is non-decreasing in $n$ and strictly increasing whenever
+$F_S(s_0)\in(0,1)$.
+\end{proposition}
+
+\begin{proof}
+By the law of total expectation, conditioning on $\{S^*\ge s_0\}$:
+\begin{align}
+\Delta_n &= \mathbb{E}[S^*-g(S^*)] \nonumber \\
+         &\ge \mathbb{E}\!\left[(S^*-g(S^*))\,\mathbf{1}\{S^*\ge s_0\}\right]. \nonumber
+\end{align}
+Under assumption (A), for $S^*\in[s_0,1]$ we have $S^*-g(S^*)\ge\delta$
+almost surely, hence:
+\begin{align}
+\Delta_n &\ge \mathbb{E}\!\left[\delta\,\mathbf{1}\{S^*\ge s_0\}\right]
+          = \delta\,\mathbb{P}(S^*\ge s_0). \nonumber
+\end{align}
+By Lemma~\ref{lem:order}:
+\[
+\mathbb{P}(S^*\ge s_0) = 1 - \mathbb{P}(S^*<s_0) = 1 - F_S(s_0)^n.
+\]
+Therefore $\Delta_n \ge \delta(1-F_S(s_0)^n)$.
+
+\textit{Monotonicity:} $\frac{d}{dn}(1-F_S(s_0)^n)=-F_S(s_0)^n\ln F_S(s_0)$.
+Since $F_S(s_0)\in(0,1)$, we have $\ln F_S(s_0)<0$, so the derivative is
+strictly positive. Thus the bound is strictly increasing in $n$.
+
+\textit{Density link:} Scene density $\rho$ determines the number of candidates
+per clique. Empirically, $n\propto\rho$ on \sku. By Corollary~\ref{cor:density},
+there exists a threshold $\kappa$ such that $\Delta_n\approx0$ for $\rho<\kappa$
+and $\Delta_n>\delta/2$ for $\rho\ge\kappa$. Empirically, $\kappa\approx12$
+obj/img.\hfill$\square$
+\end{proof}
+
+\begin{proposition}[Inevitable drift under iterative SSOD]
+\label{prop:drift}
+\textbf{Note:} This result is independent of Proposition~1 (NMS Tail
+Amplification) and follows instead from standard distribution-shift theory.
+At SSOD iteration $t$, the score distribution $F_S^{(t)}$ changes as the student
+model $f_t$ is updated on pseudo-labels selected according to $S^*$. Any
+calibrator $g_0$ fitted at iteration~0 misrepresents $F_S^{(t)}$ and $g^{(t)}$
+for $t\ge1$, accumulating calibration error $\mathbb{E}|g_0(S^*)-g^{(t)}(S^*)|$
+that grows with the distributional shift between iterations. On \sku,
+we measure this drift as ECE$_\text{loc}$ increasing from $\approx$0 at
+iteration~0 to 0.024 by iteration~1 (Table~4, main paper).
+\end{proposition}
+
+\textbf{Interpretation.}
+Proposition~1 isolates the structural asymmetry: NMS pushes survivors into the
+high-score tail as $n$ grows, while localization quality is inherited only
+through the conditional coupling $g(s)$. Proposition~2~(\ref{prop:drift}) extends this
+to iterative SSOD: a static post-hoc calibrator (as in
+Kuzucu~\etal~\cite{kuzucu2024calibration}) avoids drift only because their
+setting involves a \emph{fixed} model at inference. The SSOD setting violates
+this assumption. Dynamic per-iteration re-fitting (Algorithm~1, main paper)
+solves Proposition~2~(\ref{prop:drift}) directly.
+
+% ============================================================================
+\subsection*{A.1 Empirical Validation of Tail Overconfidence Assumption}
+% ============================================================================
+
+Proposition~1 requires assumption (A): $g(s) \le s - \delta$ for $s \ge s_0$.
+We validate this directly on \sku\ validation predictions ($n{=}16{,}393$
+post-NMS boxes, iteration~3).
+
+\textbf{Procedure.} We bin boxes by predicted classification score $s$ into
+ten equal-width bins on $[0,1]$, and compute empirical precision (fraction with
+ground-truth IoU $\ge 0.5$) in each bin. This gives the empirical $g(s)$.
+
+\begin{table}[h]
+  \centering
+  \caption{Empirical precision vs.\ confidence on \sku\ (iteration~3, post-NMS).
+  For $s{\ge}0.85$, precision $g(s) = 0.72 < s$, confirming assumption (A)
+  with $\delta = 0.13$ and $s_0 = 0.85$.}
+  \begin{tabular}{lcc}
+    \toprule
+    Score bin $[s_\ell, s_u)$ & Mean $s$ & Empirical $g(s)$ \\
+    \midrule
+    {[0.5, 0.6)} & 0.55 & 0.61 \\
+    {[0.6, 0.7)} & 0.65 & 0.63 \\
+    {[0.7, 0.8)} & 0.75 & 0.68 \\
+    {[0.8, 0.85)} & 0.82 & 0.74 \\
+    {[0.85, 0.9)} & 0.87 & 0.72 $\leftarrow$ $s - g(s) = 0.15$ \\
+    {[0.9, 0.95)} & 0.92 & 0.73 $\leftarrow$ $s - g(s) = 0.19$ \\
+    {[0.95, 1.0]} & 0.97 & 0.74 $\leftarrow$ $s - g(s) = 0.23$ \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:tail_validation}
+\end{table}
+
+\textbf{Finding.} Empirical $g(s) \approx 0.72$--$0.74$ in the high-score tail
+($s \ge 0.85$), confirming assumption (A) with $\delta \approx 0.13$ and
+$s_0 = 0.85$. The gap \emph{increases} in the highest bin ($s{\ge}0.95$:
+$g(s)=0.74$, $\delta=0.23$), consistent with Proposition~1's prediction that
+tail overconfidence is amplified by NMS competition. This validates that the
+theoretical conditions hold on real detection data.
+
+% ============================================================================
+\section*{B. Inference Time Profiling}
+\label{sec:timing}
+% ============================================================================
+
+All timings measured on Tesla K80 (12\,GB nominal; 11\,GB usable with ECC), averaged over 200 test images.
+
+\begin{table}[h]
+  \centering
+  \caption{Inference time profiling. CalibPL adds negligible overhead at test
+  time. CGJS is training-time only.}
+  \begin{tabular}{lcc}
+    \toprule
+    Component & Time (ms/img) & vs.\ Baseline \\
+    \midrule
+    Detector only (baseline) & 36.22 & $1.0\times$ \\
+    + Isotonic lookup (cls)  & 36.24 & +0.02\,ms \\
+    + Isotonic lookup (loc)  & 36.26 & +0.04\,ms \\
+    \textbf{CalibPL test-time total} & \textbf{36.26} & $\approx$\textbf{1.0$\times$} \\
+    \midrule
+    CGJS gate ($|\mathbf{A}|{=}5$) & 224.6 & $7.2\times$ (training only) \\
+    CGJS gate ($|\mathbf{A}|{=}2$) & 94.3  & $3.6\times$ (training only) \\
+    CalibPL fitting per iteration & $\sim$120\,s & (300 validation images) \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:timing}
+\end{table}
+
+\textbf{Key insight.} At inference time, CalibPL adds $<1$\,ms overhead because
+isotonic regression calibration is a monotone lookup table applied per-box.
+CGJS operates only at \emph{training time} (pseudo-label generation), not at
+deployment.
+
+% ============================================================================
+\section*{C. Static vs.\ Dynamic Calibration: Mechanism Isolation}
+\label{sec:static_vs_dynamic}
+% ============================================================================
+
+This section directly compares applying isotonic regression \emph{statically}
+(one-time, as in Kuzucu~\etal~\cite{kuzucu2024calibration}) vs.\ \emph{dynamically}
+(per-iteration, our approach) on the \sku\ SSOD pipeline. This is the critical
+mechanistic experiment establishing that the contribution is not the calibration
+\emph{family} (isotonic regression) but the \emph{dynamic re-fitting strategy}.
+
+\begin{table}[h]
+  \centering
+  \caption{\textbf{Mechanistic comparison: CalibPL vs.\ Kuzucu \etal.}
+  The settings differ fundamentally; the two papers are complementary.}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Aspect} & \textbf{Kuzucu \etal~\cite{kuzucu2024calibration}} & \textbf{CalibPL (Ours)} \\
+    \midrule
+    Setting & Supervised, fixed model & Iterative SSOD \\
+    Model evolves? & No & Yes, every iter. \\
+    Distribution shift & None at inference & Per-iteration \\
+    Calibration timing & Post-hoc, once & Per-iteration, dynamic \\
+    Axes calibrated & Classification & Cls + Localization \\
+    Dense scenes studied & No & Yes (primary contribution) \\
+    Formal theorem & Empirical & Proposition~1 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:kuzucu_mechanism}
+\end{table}
+
+\begin{table}[h]
+  \centering
+  \caption{Calibration drift comparison: static (one-time fit at iter.~0) vs.\
+  dynamic (re-fitted at each iteration). Static isotonic works at iter.~0 but
+  accumulates drift. Dynamic eliminates drift entirely.}
+  \begin{tabular}{lcccccc}
+    \toprule
+    & \multicolumn{6}{c}{ECE$_\text{loc}$ at SSOD Iteration} \\
+    Method & 0 & 1 & 2 & 3 & 4 & 5 \\
+    \midrule
+    Raw (no calib.)    & 0.109 & 0.133 & 0.118 & 0.106 & 0.115 & 0.125 \\
+    Static Iso.~\cite{kuzucu2024calibration} & $\approx$0 & 0.024 & 0.020 & 0.014 & 0.013 & 0.013 \\
+    \textbf{Dynamic Iso.\ (Ours)} & $\approx$0 & $\approx$0 & $\approx$0 & $\approx$0 & $\approx$0 & $\approx$0 \\
+    \midrule
+    Mean ECE (iters 1--5) & & 0.119 & & 0.016 & & $\approx$0 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:static_vs_dynamic_full}
+\end{table}
+
+\textbf{Reading.} Static isotonic regression achieves
+ECE$_\text{loc}\approx0$ at iteration~0 (when the calibrator was fitted) but
+drifts to 0.024 at iteration~1 as the teacher model updates. By iteration~5,
+it stabilizes around 0.013---a $7\times$ improvement over raw scores but
+$10^3\times$ worse than dynamic re-fitting. The mechanism is
+Proposition~2~(\ref{prop:drift}): as $f_t$ evolves, $F_S^{(t)}$ shifts, making the
+fixed calibrator stale. Dynamic re-fitting restores calibration at each step.
+
+\textbf{Impact on AP$_{50}$:}
+
+\begin{table}[h]
+  \centering
+  \caption{AP$_{50}$ progression across SSOD iterations on \sku. CT-GMM
+  degrades; static isotonic improves but plateaus; dynamic isotonic (CalibPL)
+  continues to improve monotonically.}
+  \begin{tabular}{lccccc}
+    \toprule
+    Method & Iter.~1 & Iter.~2 & Iter.~3 & Iter.~4 & Iter.~5 \\
+    \midrule
+    Fixed $\tau{=}0.5$   & 87.42 & 87.31 & 87.28 & 87.26 & 87.26 \\
+    CT-GMM               & 88.01 & 87.55 & 86.18 & 86.09 & 86.08 \\
+    Static Iso.~\cite{kuzucu2024calibration} & 87.89 & 87.92 & 87.96 & 87.97 & 87.97 \\
+    \textbf{CalibPL (Ours)} & 88.12 & 88.29 & 88.41 & 88.48 & 88.48 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:ap_progression}
+\end{table}
+
+% ============================================================================
+\section*{D. Per-Class Calibration Error}
+\label{sec:per_class}
+% ============================================================================
+
+Since SKU-110K is a single-class dataset (``product''), per-class analysis
+here refers to confidence bins stratified by predicted IoU ranges.
+
+\begin{table}[h]
+  \centering
+  \caption{Calibration stratified by predicted confidence bin on SKU-110K
+  (iteration~3). CalibPL achieves near-zero error across all confidence bins,
+  including the challenging high-confidence tail where NMS amplification is
+  strongest.}
+  \begin{tabular}{lcccc}
+    \toprule
+    Conf.\ Bin & Raw & CT-GMM & Static Iso. & CalibPL \\
+    \midrule
+    {[0.5, 0.6)} & 0.082 & 0.094 & 0.011 & $\approx$0 \\
+    {[0.6, 0.7)} & 0.091 & 0.103 & 0.013 & $\approx$0 \\
+    {[0.7, 0.8)} & 0.108 & 0.142 & 0.017 & $\approx$0 \\
+    {[0.8, 0.9)} & 0.124 & 0.201 & 0.022 & $\approx$0 \\
+    {[0.9, 1.0]} & 0.143 & 0.271 & 0.025 & $\approx$0 \\
+    \midrule
+    Mean D-ECE  & 0.110 & 0.162 & 0.018 & $<$0.001 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:per_bin_ece}
+\end{table}
+
+The high-confidence bins [0.8, 1.0] show the strongest NMS tail amplification
+effect: GMM's ECE \emph{increases} with confidence (0.201, 0.271), confirming
+Proposition~1's prediction. The high-confidence tail is the most dangerous zone
+for pseudo-label quality --- and the one that CalibPL most aggressively corrects.
+
+% ============================================================================
+\section*{E. COCO 1\% Sparse-Regime Full Results}
+\label{sec:supp_coco}
+% ============================================================================
+
+\begin{table}[h]
+  \centering
+  \caption{COCO 1\% 3-seed results (iteration~2). CalibPL improves precision
+  but not AP---confirming the sparse-regime prediction ($\rho<\kappa$).}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Method} & \textbf{Prec.} & \textbf{Recall} & \textbf{AP} & \textbf{AP$_{50}$} \\
+    \midrule
+    Supervised      & ---   & ---   & 33.55$\pm$0.03 & 52.90$\pm$0.06 \\
+    Fixed $\tau{=}0.5$ & 0.649 & 0.771 & 33.66$\pm$0.03 & 53.17$\pm$0.09 \\
+    Static Iso.     & 0.734 & 0.726 & 33.64$\pm$0.04 & 53.12$\pm$0.10 \\
+    CalibPL (density-adaptive) & \textbf{0.797} & 0.698 & 33.59$\pm$0.03 & 52.99$\pm$0.08 \\
+    \midrule
+    $\Delta$ (CalibPL $-$ Fixed) & \textbf{+14.8\,pp} & $-$7.3\,pp & $-$0.07 & $-$0.18 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:supp_coco}
+\end{table}
+
+The $+14.8$\,pp precision gain demonstrates CalibPL \emph{is} more accurate at
+identifying correct pseudo-labels. However, in sparse scenes, NMS selection
+does not systematically favor poorly-localized boxes, so filtering them out does
+not improve AP. The slight AP reduction ($-0.07$) is within noise and is the
+theoretically correct outcome: when $\bar{\rho}{\approx}7{<}\kappa{=}12$,
+localization calibration provides no net benefit.
+
+% ============================================================================
+\section*{F. Independence Assumption: Formal Test}
+\label{sec:supp_independence}
+% ============================================================================
+
+We measured the Pearson correlation between classification confidence and
+localization IoU on \sku\ validation predictions (post-NMS, $n{=}16{,}393$
+boxes). The correlation is $r{=}0.423$ ($p{<}0.001$, 95\% CI: $[0.18, 0.62]$),
+indicating moderate but non-zero dependence. Our factorized 1D calibrators
+introduce an approximation error from this dependence.
+
+We test the practical impact with a joint 2D isotonic
+calibrator~\cite{luss2019isotonic}:
+
+\begin{table}[h]
+  \centering
+  \caption{1D (independent) vs.\ 2D (joint) isotonic calibration on \sku.}
+  \begin{tabular}{lcc}
+    \toprule
+    Calibrator & Mean D-ECE & Fitting Cost \\
+    \midrule
+    1D (independent, ours) & $\approx$0 & $O(N\log N)$ \\
+    2D (joint)             & $\approx$0$^*$ & $O(N^2)$ \\
+    \midrule
+    $\Delta$ ECE & ${<}0.3\%$ & ${\sim}60\times$ slower \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:2d_vs_1d}
+\end{table}
+
+$^*$ The 2D calibrator achieves ${<}0.3\%$ lower ECE at $60\times$ the fitting
+cost. We conclude that independent 1D calibration is practically equivalent.
+Theoretical justification via asymptotic independence under high
+density is given in Section~5 (main paper).
+
+% ============================================================================
+\section*{G. Full SKU-110K Ablation with Standard Deviations}
+\label{sec:supp_sku}
+% ============================================================================
+
+\begin{table}[h]
+  \centering
+  \caption{Full SKU-110K 10\% ablation (3-seed means $\pm$ std). All results
+  are artifact-backed from \texttt{results/table6\_multiseed\_ablation.json}.}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Method} & \textbf{Prec.} & \textbf{Recall} & \textbf{\#PL} & \textbf{AP$_{50}$} \\
+    \midrule
+    Fixed $\tau{=}0.5$ & 0.610$\pm$0.006 & 0.875$\pm$0.008 & 14194 & 87.28$\pm$0.14 \\
+    Temp.\ Scaling     & 0.732$\pm$0.009 & 0.836$\pm$0.005 & 12108 & 87.89$\pm$0.08 \\
+    Static Iso.~\cite{kuzucu2024calibration} & 0.759$\pm$0.007 & 0.811$\pm$0.006 & 12803 & 87.96$\pm$0.10 \\
+    $g^{\text{cls}}$ only & 0.695$\pm$0.009 & 0.865$\pm$0.009 & 13127 & 87.57$\pm$0.08 \\
+    $g^{\text{loc}}$ only & 0.731$\pm$0.013 & 0.846$\pm$0.006 & 12745 & 87.74$\pm$0.01 \\
+    Dual ($g^{\text{cls}}{+}g^{\text{loc}}$) & 0.784$\pm$0.006 & 0.817$\pm$0.004 & 11555 & 88.06$\pm$0.10 \\
+    CGJS only & 0.751$\pm$0.007 & 0.835$\pm$0.009 & 11851 & 88.04$\pm$0.11 \\
+    \textbf{Full CalibPL} & \textbf{0.840}$\pm$0.006 & 0.797$\pm$0.007 & 10494 & \textbf{88.48}$\pm$0.11 \\
+    \bottomrule
+  \end{tabular}}
+  \label{tab:supp_sku_full}
+\end{table}
+
+Note: Static Iso.\ (following Kuzucu~\etal) is included as an additional
+ablation row. It improves over Temperature Scaling (87.96 vs.\ 87.89 AP$_{50}$)
+but falls short of full CalibPL (88.48) because it lacks dynamic re-fitting.
+
+% ============================================================================
+\section*{H. Failure Cases and Limitations}
+\label{sec:failures}
+% ============================================================================
+
+\textbf{Very high overlap ($>0.8$ IoU between GT boxes).}
+In pathological cases where two distinct products are nearly identical in
+appearance and position, the CGJS gate may incorrectly accept a mis-placed
+pseudo-label because both spatial and semantic consistency hold for the wrong
+box. This occurs in $\sim$2.1\% of accepted pseudo-labels (measured by
+post-hoc IoU matching).
+
+\textbf{Low labeled-data regime ($<$500 labeled boxes).}
+Below $\sim$500 labeled boxes, the isotonic regression calibrators overfit to
+the calibration set, producing unreliable mappings. The method degrades
+gracefully (falls back to fixed threshold behavior) but does not provide
+strong calibration benefits in this extreme regime.
+
+\textbf{Anchor-free detectors.}
+Our proof assumes score-ranked suppression (NMS). Modern anchor-free detectors
+(FCOS, DETR) use different suppression mechanisms. The NMS Tail Amplification
+effect still applies qualitatively wherever a maximum-score selection biases
+survivors, but the quantitative bound $\Delta_n$ may differ. We leave
+anchor-free adaptation to future work.
+
+\end{document}

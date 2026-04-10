@@ -1,0 +1,121 @@
+%% ============================================================================
+%% wacv.sty  —  WACV 2027 Style File
+%%
+%% Clean, self-contained CVF-compatible two-column layout.
+%% No external dependencies beyond standard TeX Live packages.
+%%
+%% Usage:
+%%   \documentclass[10pt,twocolumn,letterpaper]{article}
+%%   \usepackage{wacv}
+%% ============================================================================
+
+\typeout{WACV 2027 Style}
+
+%% ---- Core fonts ------------------------------------------------------------
+\usepackage{times}
+\usepackage{helvet}
+\usepackage{courier}
+
+%% ---- Page geometry (US Letter, CVF standard) -------------------------------
+%%  Text area: 6.875 in wide x 8.875 in tall
+%%  Two columns, each 3.275 in, gutter 0.325 in
+\setlength{\textheight}{8.875in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{0.3125in}
+\setlength{\topmargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\oddsidemargin}{-.304in}
+\setlength{\evensidemargin}{-.304in}
+\setlength{\parindent}{1pc}
+\setlength{\footskip}{0.4in}
+
+%% No page numbers (submission mode)
+\pagestyle{empty}
+
+%% ---- Title block -----------------------------------------------------------
+\def\@maketitle{%
+  \newpage\null
+  \vskip 0.25in
+  \begin{center}
+    {\Large\bfseries\@title\par}
+    \vspace{0.15in}
+    {\large\lineskip 0.5em
+      \begin{tabular}[t]{c}\@author\end{tabular}\par}
+    \vspace{0.05in}
+    {\large\@date}
+  \end{center}
+  \vspace{0.1in}
+}
+
+%% ---- Abstract environment --------------------------------------------------
+%%  Used inside \twocolumn[...] so it spans both columns naturally.
+\newenvironment{wacvabstract}{%
+  \centerline{\large\bfseries Abstract}%
+  \vspace{0.5ex}%
+  \begin{quote}\normalsize\itshape
+}{%
+  \end{quote}%
+  \vspace{1ex}%
+}
+
+%% ---- Section headings ------------------------------------------------------
+\makeatletter
+
+\renewcommand\section{%
+  \@startsection{section}{1}{\z@}%
+    {10pt plus 2pt minus 2pt}{6pt}{\large\bfseries}}
+
+\renewcommand\subsection{%
+  \@startsection{subsection}{2}{\z@}%
+    {8pt plus 2pt minus 2pt}{5pt}{\normalsize\bfseries}}
+
+\renewcommand\subsubsection{%
+  \@startsection{subsubsection}{3}{\z@}%
+    {6pt plus 1pt minus 1pt}{4pt}{\normalsize\itshape}}
+
+%% ---- Figure/table captions (9pt, bold label) ------------------------------
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \sbox\@tempboxa{\small\textbf{#1.}~\small#2}%
+  \ifdim \wd\@tempboxa >\hsize
+    {\small\textbf{#1.}~\small#2\par}%
+  \else
+    \global\@minipagefalse
+    \hb@xt@\hsize{\hfil\box\@tempboxa\hfil}%
+  \fi
+  \vskip\belowcaptionskip}
+
+\makeatother
+
+%% ---- Overfull box tolerance ------------------------------------------------
+\tolerance=500
+\hbadness=500
+\emergencystretch=2em
+
+%% ---- Float placement parameters -------------------------------------------
+\makeatletter
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\renewcommand{\dbltopfraction}{0.90}
+\renewcommand{\dblfloatpagefraction}{0.85}
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{4}
+\setcounter{totalnumber}{8}
+\setcounter{dbltopnumber}{4}
+\makeatother
+
+%% ---- CVF convenience macros -----------------------------------------------
+\makeatletter
+\DeclareRobustCommand\onedot{\futurelet\@let@token\@onedot}
+\def\@onedot{\ifx\@let@token.\else.\null\fi\xspace}
+\def\eg{\emph{e.g}\onedot}   \def\Eg{\emph{E.g}\onedot}
+\def\ie{\emph{i.e}\onedot}   \def\Ie{\emph{I.e}\onedot}
+\def\cf{\emph{cf}\onedot}    \def\Cf{\emph{Cf}\onedot}
+\def\etc{\emph{etc}\onedot}
+\def\vs{\emph{vs}\onedot}
+\def\wrt{w.r.t\onedot}
+\def\etal{\emph{et al}\onedot}
+\makeatother
