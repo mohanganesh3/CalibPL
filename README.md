@@ -1,21 +1,12 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/Venue-WACV%202027-blue?style=for-the-badge&logo=graduation-cap" alt="WACV 2027">
-<img src="https://img.shields.io/badge/Track-Algorithms-blueviolet?style=for-the-badge" alt="Algorithms Track">
-<img src="https://img.shields.io/badge/Status-Under%20Review-orange?style=for-the-badge" alt="Under Review">
-<img src="https://img.shields.io/badge/Python-3.10%2B-green?style=for-the-badge&logo=python" alt="Python">
-<img src="https://img.shields.io/badge/Framework-PyTorch-red?style=for-the-badge&logo=pytorch" alt="PyTorch">
-<img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License">
-
-<br><br>
+<br>
 
 # CalibPL: Dual Isotonic Calibration Reveals the Hidden Failure Mode of Semi-Supervised Detection in Dense Scenes
 
 **[WACV 2027 Submission · Algorithms Track · Double-Blind Review]**
 
-<p align="center">
-  <img src="paper/wacv2027/wacv2027_submission/figures/figure1_overview.png" alt="CalibPL Overview" width="85%">
-</p>
+
 
 > *We identify and formally prove **NMS Tail Amplification** — a fundamental failure mode that causes semi-supervised object detectors to hallucinate confident, spatially incorrect pseudo-labels in dense scenes. Our fix, **CalibPL**, dynamically re-calibrates confidence at every self-training iteration, achieving **+1.20 AP₅₀** on dense retail shelves, **+8.3 AP** cross-domain on CrowdHuman, and a **~70% false-positive reduction** — while being theoretically grounded with a falsifiable prediction (no gain on sparse COCO, confirmed at p=0.41).*
 
